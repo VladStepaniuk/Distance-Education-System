@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.32002.261
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DESystem", "DESystem.csproj", "{309AB387-0958-4476-BE2C-B310CF5E63EF}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{309AB387-0958-4476-BE2C-B310CF5E63EF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{309AB387-0958-4476-BE2C-B310CF5E63EF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{309AB387-0958-4476-BE2C-B310CF5E63EF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{309AB387-0958-4476-BE2C-B310CF5E63EF}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {6D96A40C-2B05-429C-BF20-DA7A0B7A7217}
+	EndGlobalSection
+EndGlobal
