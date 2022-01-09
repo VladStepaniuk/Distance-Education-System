@@ -13,5 +13,8 @@ namespace DESystem.Data
         {
 
         }
+
+        public DbSet<Group> Groups { get; set; }
+        public DbSet<Institution> Institutions { get; set; }
     }
 }
