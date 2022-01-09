@@ -8,8 +8,8 @@ namespace DESystem.Repositories
 {
     public interface IUnitOfWork
     {
-        IRepository<Institution> Institutions { get; }
-        IRepository<Course> Courses { get; }
+        IRepository<Institution> InstitutionRepository { get; }
+        IRepository<Course> CourseRepository { get; }
         void Commit();
     }
 }

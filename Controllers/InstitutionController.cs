@@ -13,5 +13,12 @@ namespace DESystem.Controllers
     public class InstitutionController : ControllerBase
     {
         private UnitOfWork unitOfWork = new UnitOfWork();
+
+        [HttpGet]
+        [Route ("list")]
+        public async Task<IActionResult> GetIstitutions()
+        {
+            return Ok(await unitOfWork.InstitutionRepository.Get());
+        }
     }
 }

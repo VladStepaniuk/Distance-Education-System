@@ -6,18 +6,13 @@ using System.Threading.Tasks;
 
 namespace DESystem.Repositories
 {
-    public class UnitOfWork : IUnitOfWork
+    public class UnitOfWork : IUnitOfWork, IDisposable
     {
         private ApplicationDbContext _dbContext;
         private BaseRepository<Institution> _institutions;
         private BaseRepository<Course> _courses;
 
-        public UnitOfWork(ApplicationDbContext dbContext)
-        {
-            _dbContext = dbContext;
-        }
-
-        public IRepository<Institution> Institutions
+        public IRepository<Institution> InstitutionRepository
         {
             get
             {
@@ -25,7 +20,7 @@ namespace DESystem.Repositories
             }
         }
 
-        public IRepository<Course> Courses
+        public IRepository<Course> CourseRepository
         {
             get
             {
@@ -36,6 +31,11 @@ namespace DESystem.Repositories
         public async void Commit()
         {
             await _dbContext.SaveChangesAsync();
+        }
+
+        public void Dispose()
+        {
+            throw new NotImplementedException();
         }
     }
 }
