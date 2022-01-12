@@ -58,6 +58,16 @@ namespace DESystem
                     IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("SuperSecretKey#345"))
                 };
             });
+
+            services.AddCors(options =>
+            {
+                options.AddPolicy("EnableCORS", builder =>
+                {
+                    builder.AllowAnyOrigin()
+                    .AllowAnyHeader()
+                    .AllowAnyMethod();
+                });
+            });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -69,6 +79,8 @@ namespace DESystem
             }
 
             app.UseRouting();
+
+            app.UseCors("EnableCORS");
 
             app.UseAuthentication();
             app.UseAuthorization();
