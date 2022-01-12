@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using System;
 using System.Collections.Generic;
@@ -22,14 +23,17 @@ namespace DESystem.Controllers
         private readonly ILogger<AuthController> _logger;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly SignInManager<ApplicationUser> _signinManager;
+        private readonly JWTConfig _jwtConfig;
 
         public AuthController(ILogger<AuthController> logger,
                         UserManager<ApplicationUser> userManager,
-                        SignInManager<ApplicationUser> signinManager)
+                        SignInManager<ApplicationUser> signinManager,
+                        IOptions<JWTConfig> jwtConfig)
         {
             _logger = logger;
             _userManager = userManager;
             _signinManager = signinManager;
+            _jwtConfig = jwtConfig.Value;
         }
 
         [HttpGet, Route("userlist")]
@@ -78,14 +82,14 @@ namespace DESystem.Controllers
             {
                 if (ModelState.IsValid)
                 {
-                    return await Task.FromResult("Parameters are missing");
-
-
                     var result = await _signinManager.PasswordSignInAsync(model.Email, model.Password, false, false);
 
                     if (result.Succeeded)
                     {
-                        return await Task.FromResult("login successfully");
+                        var appUser = await _userManager.FindByEmailAsync(model.Email);
+                        var user = new UserModelDTO(appUser.FullName, appUser.Email, appUser.UserName, appUser.DateCreated);
+                        user.Token = GenerateToken(appUser);
+                        return await Task.FromResult(user);
                     }
                 }
                 return await Task.FromResult("invalid email and username");
@@ -93,6 +97,27 @@ namespace DESystem.Controllers
             {
                 return await Task.FromResult(ex.Message);
             }
+        }
+
+        private string GenerateToken(ApplicationUser user)
+        {
+            var jwtTokenHandler = new JwtSecurityTokenHandler();
+            var key = Encoding.ASCII.GetBytes(_jwtConfig.Key);
+            var tokenDescriptor = new SecurityTokenDescriptor
+            {
+                Subject = new ClaimsIdentity(new[]
+                {
+                    new Claim(JwtRegisteredClaimNames.NameId, user.Id),
+                    new Claim(JwtRegisteredClaimNames.Email, user.Email),
+                    new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
+                }),
+                Expires = DateTime.UtcNow.AddHours(12),
+                SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature),
+                Audience = _jwtConfig.Audience,
+                Issuer = _jwtConfig.Issuer
+            };
+            var token = jwtTokenHandler.CreateToken(tokenDescriptor);
+            return jwtTokenHandler.WriteToken(token);
         }
     }
 }

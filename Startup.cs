@@ -1,4 +1,5 @@
 using DESystem.Data;
+using DESystem.Models;
 using DESystem.Repositories;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
@@ -31,6 +32,7 @@ namespace DESystem
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.Configure<JWTConfig>(Configuration.GetSection("JWTConfig"));
             services.AddControllers();
             services.AddScoped(typeof(IRepository<>), typeof(BaseRepository<>));
             services.AddScoped<IUnitOfWork, UnitOfWork>();
@@ -39,34 +41,21 @@ namespace DESystem
             services.AddIdentity<ApplicationUser, IdentityRole>(options => options.SignIn.RequireConfirmedAccount = false)
                 .AddEntityFrameworkStores<ApplicationDbContext>();
 
-            services.AddAuthentication(opt =>
+            services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(opt =>
             {
-                opt.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-                opt.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-            })
-            .AddJwtBearer(options =>
-            {
-                options.TokenValidationParameters = new TokenValidationParameters
+                var key = Encoding.ASCII.GetBytes(Configuration["JWTConfig:Key"]);
+                var issuer = Configuration["JWTConfig:Issuer"];
+                var audience = Configuration["JWTConfig:Audience"];
+                opt.TokenValidationParameters = new TokenValidationParameters()
                 {
+                    ValidateIssuerSigningKey = true,
+                    IssuerSigningKey = new SymmetricSecurityKey(key),
                     ValidateIssuer = true,
                     ValidateAudience = true,
-                    ValidateLifetime = true,
-                    ValidateIssuerSigningKey = true,
-
-                    ValidIssuer = "http://localhost:16087",
-                    ValidAudience = "http://localhost:16087",
-                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("SuperSecretKey#345"))
+                    RequireExpirationTime = true,
+                    ValidIssuer = issuer, 
+                    ValidAudience = audience
                 };
-            });
-
-            services.AddCors(options =>
-            {
-                options.AddPolicy("EnableCORS", builder =>
-                {
-                    builder.AllowAnyOrigin()
-                    .AllowAnyHeader()
-                    .AllowAnyMethod();
-                });
             });
         }
 
@@ -79,8 +68,6 @@ namespace DESystem
             }
 
             app.UseRouting();
-
-            app.UseCors("EnableCORS");
 
             app.UseAuthentication();
             app.UseAuthorization();
