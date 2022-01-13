@@ -22,6 +22,7 @@ namespace DESystem
 {
     public class Startup
     {
+        private readonly string _loginOrigin = "_localorigin";
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
@@ -41,6 +42,15 @@ namespace DESystem
             services.AddIdentity<ApplicationUser, IdentityRole>(options => options.SignIn.RequireConfirmedAccount = false)
                 .AddEntityFrameworkStores<ApplicationDbContext>();
 
+            services.AddCors(opt =>
+            {
+                opt.AddPolicy(_loginOrigin, builder =>
+                {
+                    builder.AllowAnyOrigin();
+                    builder.AllowAnyMethod();
+                    builder.AllowAnyHeader();
+                });
+            });
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(opt =>
             {
                 var key = Encoding.ASCII.GetBytes(Configuration["JWTConfig:Key"]);
@@ -68,7 +78,7 @@ namespace DESystem
             }
 
             app.UseRouting();
-
+            app.UseCors(_loginOrigin);
             app.UseAuthentication();
             app.UseAuthorization();
 

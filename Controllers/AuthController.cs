@@ -66,12 +66,12 @@ namespace DESystem.Controllers
                 var result = await _userManager.CreateAsync(user, model.Password);
                 if (result.Succeeded)
                 {
-                    return await Task.FromResult("User has been Registered successfully");
+                    return await Task.FromResult(new ResponseModel(Enums.ResponseCode.Ok, "User has been Registered successfully", null));
                 }
-                return await Task.FromResult(string.Join(",", result.Errors.Select(x => x.Description).ToArray()));
+                return await Task.FromResult( new ResponseModel(Enums.ResponseCode.Fail, "", result.Errors.Select(x => x.Description).ToArray()));
             }catch(Exception ex)
             {
-                return await Task.FromResult(ex.Message);
+                return await Task.FromResult(new ResponseModel(Enums.ResponseCode.Fail, ex.Message, null));
             }
         }
 
@@ -92,10 +92,10 @@ namespace DESystem.Controllers
                         return await Task.FromResult(user);
                     }
                 }
-                return await Task.FromResult("invalid email and username");
+                return await Task.FromResult(new ResponseModel(Enums.ResponseCode.Fail, "invalid username or password", null));
             }catch(Exception ex)
             {
-                return await Task.FromResult(ex.Message);
+                return await Task.FromResult(new ResponseModel(Enums.ResponseCode.Fail, ex.Message, null)); 
             }
         }
 
