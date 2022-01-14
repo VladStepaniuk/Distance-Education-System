@@ -16,4 +16,14 @@ export class AuthService {
 
     return this.httpClient.post(this.baseURL + "login", body);
   }
+
+  public register(fullName:string, email:string, password:string){
+    const body = {
+      fullName: fullName,
+      Email: email,
+      Password: password
+    }
+
+    return this.httpClient.post(this.baseURL + "register", body);
+  }
 }

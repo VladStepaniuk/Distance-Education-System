@@ -36,19 +36,6 @@ namespace DESystem.Controllers
             _jwtConfig = jwtConfig.Value;
         }
 
-        [HttpGet, Route("userlist")]
-        public async Task<object> GetUserList()
-        {
-            try
-            {
-                var users = _userManager.Users;
-                return await Task.FromResult(users);
-            }catch(Exception ex)
-            {
-                return await Task.FromResult(ex.Message);
-            }
-        }
-
         [HttpPost, Route("register")]
         public async Task<object> Register([FromBody] RegisterModel model)
         {
@@ -89,7 +76,7 @@ namespace DESystem.Controllers
                         var appUser = await _userManager.FindByEmailAsync(model.Email);
                         var user = new UserModelDTO(appUser.FullName, appUser.Email, appUser.UserName, appUser.DateCreated);
                         user.Token = GenerateToken(appUser);
-                        return await Task.FromResult(user);
+                        return await Task.FromResult(new ResponseModel(Enums.ResponseCode.Ok, "", user));
                     }
                 }
                 return await Task.FromResult(new ResponseModel(Enums.ResponseCode.Fail, "invalid username or password", null));
