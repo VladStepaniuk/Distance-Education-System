@@ -1,5 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
+import { ResponseModel } from '../models/responseModel';
 
 @Injectable({
   providedIn: 'root'
@@ -14,7 +15,7 @@ export class AuthService {
       Password: password
     }
 
-    return this.httpClient.post(this.baseURL + "login", body);
+    return this.httpClient.post<ResponseModel>(this.baseURL + "login", body);
   }
 
   public register(fullName:string, email:string, password:string){
@@ -24,6 +25,6 @@ export class AuthService {
       Password: password
     }
 
-    return this.httpClient.post(this.baseURL + "register", body);
+    return this.httpClient.post<ResponseModel>(this.baseURL + "register", body);
   }
 }

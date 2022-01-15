@@ -1,5 +1,10 @@
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
+import { ResponseModel } from '../models/responseModel';
+import { map } from 'rxjs/operators';
+import { ResponseCode } from '../enums/responseCode';
+import { User } from '../models/user';
+import { Constants } from 'src/Helper/constants';
 
 @Injectable({
   providedIn: 'root'
@@ -9,9 +14,23 @@ export class UserService {
   constructor(private httpClient: HttpClient) { }
 
   public userList(){
+    let userInfo = JSON.parse(localStorage.getItem(Constants.USER_KEY));
     const header = new HttpHeaders({
-      'Authorization': `Bearer ${JSON.parse(JSON.stringify(localStorage.getItem("userInfo"))).token}`
+      'Authorization': `Bearer ${ userInfo?.token }`
     })
-    return this.httpClient.get(this.baseURL + "userlist", {headers: header} );
+
+
+    return this.httpClient.get<ResponseModel>(this.baseURL + "userlist", {headers: header} ).pipe(map(res=>{
+      let userList = new Array<User>();
+      if(res.ResponseCode == ResponseCode.Ok){
+        if(res.DataSet){
+          res.DataSet.map((x:User) => {
+            userList.push(new User(x.fullName, x.email, x.userName))
+          })
+        }
+      }
+     return userList;
+      
+    }));
   }
 }

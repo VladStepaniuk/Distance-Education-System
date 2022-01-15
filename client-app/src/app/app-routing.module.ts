@@ -1,5 +1,6 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
+import { AuthenticGuardService } from './guards/authentic.service';
 import { LoginComponent } from './login/login.component';
 import { RegisterComponent } from './register/register.component';
 import { UserManagementComponent } from './user-management/user-management.component';
@@ -7,7 +8,7 @@ import { UserManagementComponent } from './user-management/user-management.compo
 const routes: Routes = [
   { path: "register", component: RegisterComponent},
   { path: "login", component: LoginComponent},
-  { path: "user-management", component: UserManagementComponent}
+  { path: "user-management", component: UserManagementComponent, canActivate: [AuthenticGuardService]}
 ];
 
 @NgModule({
