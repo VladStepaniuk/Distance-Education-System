@@ -1,6 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, Validators } from '@angular/forms';
+import { Role } from '../models/role';
 import { AuthService } from '../services/auth.service';
+import { UserService } from '../services/user.service';
 
 @Component({
   selector: 'app-register',
@@ -9,14 +11,16 @@ import { AuthService } from '../services/auth.service';
 })
 export class RegisterComponent implements OnInit {
 
+  public roles: Role[] = [];
   public registerForm = this.formBuilder.group({
     fullName: ['', [Validators.required]],
     email: ['', [Validators.email, Validators.required]],
     password: ['', Validators.required]
   })
-  constructor(private formBuilder: FormBuilder, private authService:AuthService) { }
+  constructor(private formBuilder: FormBuilder, private authService:AuthService, private userService: UserService) { }
 
   ngOnInit(): void {
+    this.getAllRoles();
   }
 
   onSubmit(){
@@ -32,4 +36,9 @@ export class RegisterComponent implements OnInit {
     })
   }
 
+  getAllRoles(){
+    this.userService.getAllRole().subscribe(roles => {
+      this.roles = roles;
+    });
+  }
 }
