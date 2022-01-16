@@ -51,7 +51,11 @@ namespace DESystem
                     builder.AllowAnyHeader();
                 });
             });
-            services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(opt =>
+            services.AddAuthentication(x => {
+                x.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                x.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+
+            }).AddJwtBearer(opt =>
             {
                 var key = Encoding.ASCII.GetBytes(Configuration["JWTConfig:Key"]);
                 var issuer = Configuration["JWTConfig:Issuer"];

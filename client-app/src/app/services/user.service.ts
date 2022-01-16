@@ -22,9 +22,9 @@ export class UserService {
 
     return this.httpClient.get<ResponseModel>(this.baseURL + "userlist", {headers: header} ).pipe(map(res=>{
       let userList = new Array<User>();
-      if(res.ResponseCode == ResponseCode.Ok){
-        if(res.DataSet){
-          res.DataSet.map((x:User) => {
+      if(res.responseCode == ResponseCode.Ok){
+        if(res.dataSet){
+          res.dataSet.map((x:User) => {
             userList.push(new User(x.fullName, x.email, x.userName))
           })
         }

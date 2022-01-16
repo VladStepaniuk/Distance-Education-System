@@ -23,17 +23,20 @@ namespace DESystem.Controllers
         private readonly ILogger<AuthController> _logger;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly SignInManager<ApplicationUser> _signinManager;
+        private readonly RoleManager<IdentityRole> _roleManager;
         private readonly JWTConfig _jwtConfig;
 
         public AuthController(ILogger<AuthController> logger,
                         UserManager<ApplicationUser> userManager,
                         SignInManager<ApplicationUser> signinManager,
-                        IOptions<JWTConfig> jwtConfig)
+                        IOptions<JWTConfig> jwtConfig,
+                        RoleManager<IdentityRole> roleManager)
         {
             _logger = logger;
             _userManager = userManager;
             _signinManager = signinManager;
             _jwtConfig = jwtConfig.Value;
+            _roleManager = roleManager;
         }
 
         [HttpPost, Route("register")]
@@ -41,6 +44,11 @@ namespace DESystem.Controllers
         {
             try
             {
+                if (!await _roleManager.RoleExistsAsync(model.Role))
+                {
+                    return await Task.FromResult(new ResponseModel(Enums.ResponseCode.Fail, "Role does not exist", null));
+                }
+
                 var user = new ApplicationUser()
                 {
                     FullName = model.FullName,
@@ -53,6 +61,8 @@ namespace DESystem.Controllers
                 var result = await _userManager.CreateAsync(user, model.Password);
                 if (result.Succeeded)
                 {
+                    var tempUser = await _userManager.FindByEmailAsync(model.Email);
+                    await _userManager.AddToRoleAsync(tempUser, model.Role);
                     return await Task.FromResult(new ResponseModel(Enums.ResponseCode.Ok, "User has been Registered successfully", null));
                 }
                 return await Task.FromResult( new ResponseModel(Enums.ResponseCode.Fail, "", result.Errors.Select(x => x.Description).ToArray()));
@@ -74,8 +84,9 @@ namespace DESystem.Controllers
                     if (result.Succeeded)
                     {
                         var appUser = await _userManager.FindByEmailAsync(model.Email);
-                        var user = new UserModelDTO(appUser.FullName, appUser.Email, appUser.UserName, appUser.DateCreated);
-                        user.Token = GenerateToken(appUser);
+                        var role = (await _userManager.GetRolesAsync(appUser)).FirstOrDefault();
+                        var user = new UserModelDTO(appUser.FullName, appUser.Email, appUser.UserName, appUser.DateCreated, role);
+                        user.Token = GenerateToken(appUser, role);
                         return await Task.FromResult(new ResponseModel(Enums.ResponseCode.Ok, "", user));
                     }
                 }
@@ -86,7 +97,7 @@ namespace DESystem.Controllers
             }
         }
 
-        private string GenerateToken(ApplicationUser user)
+        private string GenerateToken(ApplicationUser user, string role)
         {
             var jwtTokenHandler = new JwtSecurityTokenHandler();
             var key = Encoding.ASCII.GetBytes(_jwtConfig.Key);
@@ -96,7 +107,8 @@ namespace DESystem.Controllers
                 {
                     new Claim(JwtRegisteredClaimNames.NameId, user.Id),
                     new Claim(JwtRegisteredClaimNames.Email, user.Email),
-                    new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
+                    new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+                    new Claim(ClaimTypes.Role, role)
                 }),
                 Expires = DateTime.UtcNow.AddHours(12),
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature),
